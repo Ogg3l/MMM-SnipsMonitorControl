@@ -6,6 +6,13 @@
  */
 
 var NodeHelper = require("node_helper");
+const {PythonShell} = require('python-shell');
+
+var pyShelloptions = {
+    mode: 'text',
+    scriptPath: '/home/pi/MagicMirror/modules/MMM-SnipsMonitorControl/Skripts',
+};
+
 const exec = require("child_process").exec;
 
 module.exports = NodeHelper.create({
@@ -22,22 +29,60 @@ module.exports = NodeHelper.create({
 		//console.log("Working notification system. Notification:", notification, "payload: ", payload);
 		
 		if(notification == "MONITOR_OFF"){
-			console.log("Powering Off Monitor...")
-			exec(payload, function(error, stdout, stderr) {
-				if (error) {
-					console.log(error.code);
-				}
-            });
+			
+
+			
+			//If Script is defined
+			if(payload.startsWith("SCRIPT")){
+					console.log("Powering Off Monitor per Script...");
+				
+					script = payload.substring(7)
+					
+					PythonShell.run(script, pyShelloptions, function (err, results) {
+					if (err) throw err;
+						// results is an array consisting of messages collected during execution
+						console.log('results: %j', results);
+					});
+			}
+		
+			
+			//Else make command
+			else{
+				console.log("Powering Off Monitor per Command...");
+				exec(payload, function(error, stdout, stderr) {
+					if (error) {
+						console.log("Could not power off Monitor. Error Code: " + error.code);
+					}
+				});
+
+			}
 		}
 		
 		else if (notification == "MONITOR_ON"){
-			console.log("Powering On Monitor...")
-			exec(payload, function(error, stdout, stderr) {
-				if (error) {
-					console.log(error.code);
-				}
-            });
 			
+			//If Script is defined
+			if(payload.startsWith("SCRIPT")){
+					console.log("Powering On Monitor per Script...");
+				
+					script = payload.substring(7)
+					
+					PythonShell.run(script, pyShelloptions, function (err, results) {
+					if (err) throw err;
+						// results is an array consisting of messages collected during execution
+						console.log('results: %j', results);
+					});
+			}
+			
+			
+			//Else make command
+			else{
+				console.log("Powering On Monitor per Command...");
+				exec(payload, function(error, stdout, stderr) {
+					if (error) {
+						console.log(error.code);
+					}
+				});
+			}
 		}
 		
 		else if (notification == "PI_OFF"){
@@ -49,35 +94,10 @@ module.exports = NodeHelper.create({
             });
 			
 		}
-		
-		
-		
 
-      
 
 	},
 
 	
-	/*
-	// Example function send notification test
-	sendNotificationTest: function(payload) {
-		this.sendSocketNotification("{{MODULE_NAME}}-NOTIFICATION_TEST", payload);
-	},
-
-	// this you can create extra routes for your module
-	extraRoutes: function() {
-		var self = this;
-		this.expressApp.get("/{{MODULE_NAME}}/extra_route", function(req, res) {
-			// call another function
-			values = self.anotherFunction();
-			res.send(values);
-		});
-	},
-
-	// Test another function
-	anotherFunction: function() {
-		return {date: new Date()};
-	}
-	*/
 });
 

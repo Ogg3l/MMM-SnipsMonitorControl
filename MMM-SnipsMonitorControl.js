@@ -8,7 +8,9 @@ Module.register("MMM-SnipsMonitorControl", {
     monitorOnCommand : 'tvservice --preferred && sudo chvt 6 && sudo chvt 7',
     monitorOffCommand: 'tvservice -o',
     monitorStatusCommand : 'tvservice --status',
-    raspberryOffCommand : "sleep 5;shutdown -h 0"
+    raspberryOffCommand : "sleep 5;shutdown -h 0",
+    monitorOffScript : "",
+    monitorOnScript : "",
   },
 
 
@@ -35,15 +37,45 @@ Module.register("MMM-SnipsMonitorControl", {
       var device = payload_json['device'];
       var device = payload_json['device'];
       var power_action = payload_json['power'];
-
+      
+      var payload = "";
+      
       
       if(device == "monitor"){
+          
+          //Monitor On
           if(power_action == "an"){
-            this.sendSocketNotification("MONITOR_ON",this.config.monitorOnCommand)
+            
+            //if Script is set send Script
+            if(this.config.monitorOnScript != ""){
+              payload = "SCRIPT_" + this.config.monitorOnScript;
+            }
+            
+            //If Script not set send Command
+            else{
+              payload = this.config.monitorOnCommand;
+            }
+            
+            //this.sendSocketNotification("MONITOR_ON",this.config.monitorOnCommand)
+            this.sendSocketNotification("MONITOR_ON",payload)
           }
           
+          
+          //Monitor off
           else if (power_action == "aus"){
-            this.sendSocketNotification("MONITOR_OFF",this.config.monitorOffCommand)
+            
+            //if Script is set send Script
+            if(this.config.monitorOffScript != ""){
+              payload = "SCRIPT_" + this.config.monitorOffScript;
+            }
+            
+            //If Script not set send Command
+            else{
+              payload = this.config.monitorOffCommand;
+            }
+            
+            //this.sendSocketNotification("MONITOR_OFF",this.config.monitorOffCommand)
+            this.sendSocketNotification("MONITOR_OFF",payload)
             
           }
           
